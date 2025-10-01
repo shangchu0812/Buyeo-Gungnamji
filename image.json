@@ -32,7 +32,7 @@
     { "url": "photos/section_C/여뀌_C.png",                    "date": "2025-10-03T10:50:00+09:00", "section": "C", "species": "여뀌(Persicaria)",               "density": 3 },
     { "url": "photos/section_C/카르펜타라리아이 수련_C.png",   "date": "2025-10-03T11:00:00+09:00", "section": "C", "species": "카르펜타라리아이 수련",         "density": 3 },
     { "url": "photos/section_C/흰 수련_C.png",                 "date": "2025-10-03T11:10:00+09:00", "section": "C", "species": "흰 수련(Nymphaea)",             "density": 3 },
-    { "url": "photos/section_C/detective erika_C.png",         "date": "2025-10-03T11:20:00+09:00", "section": "C", "species": "Unknown (detective erika)",     "density": 3 },
+    { "url": "photos/section_C/detective erika_C.png",         "date": "2025-10-03T11:20:00+09:00", "section": "C", "species": "detective erika",     "density": 3 },
 
     { "url": "photos/section_D/가시연_D.png",                  "date": "2025-10-04T09:30:00+09:00", "section": "D", "species": "가시연",                         "density": 3 },
     { "url": "photos/section_D/개구리밥_D.png",                 "date": "2025-10-04T09:40:00+09:00", "section": "D", "species": "개구리밥(Lemna)",                 "density": 4 },
@@ -58,4 +58,5 @@
     { "url": "photos/section_E/연꽃 잎_E.jpg",                "date": "2025-10-05T10:10:00+09:00", "section": "E", "species": "연(Nelumbo nucifera) - 잎",     "density": 2 },
     { "url": "photos/section_E/Nelumbo nucifera_E.jpg",       "date": "2025-10-05T10:20:00+09:00", "section": "E", "species": "연(Nelumbo nucifera)",           "density": 3 }
   ]
+
 }
