@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>궁남지 수생식물 탐사 대시보드</title>
+  <meta name="description" content="궁남지(부여) 수생식물·수면 상태 현장 기록과 사진 갤러리" />
+  <link rel="icon" href="data:," />
+  <style>
+    /* ===== 디자인 토큰 ===== */
+    :root{
+      --bg:#0b0e11; --panel:#11161b; --text:#e9eef2; --muted:#97a0a9; --brand:#5c7cfa; --brand2:#22d3ee;
+      --radius:16px; --shadow:0 12px 36px rgba(0,0,0,.28); --maxw:1100px;
+    }
+    @media (prefers-color-scheme: light){ :root{--bg:#ffffff; --panel:#f5f7fb; --text:#0a0d12; --muted:#5b6570;} }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",Apple SD Gothic Neo,Arial,sans-serif; background:linear-gradient(120deg,var(--bg),#0f172a); color:var(--text)}
+    a{color:var(--brand); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* ===== 레이아웃 ===== */
+    .wrap{max-width:var(--maxw); margin:0 auto; padding:20px}
+    header{position:sticky; top:0; z-index:10; backdrop-filter:saturate(1.2) blur(6px); border-bottom:1px solid rgba(255,255,255,.06); background:color-mix(in hsl, var(--bg) 78%, transparent)}
+    .nav{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 20px}
+    .logo{font-weight:800; letter-spacing:.3px; display:flex; align-items:center; gap:10px}
+    .logo-badge{width:10px; height:10px; border-radius:999px; background:linear-gradient(45deg,var(--brand),var(--brand2)); box-shadow:0 0 0 4px rgba(92,124,250,.25)}
+    .menu{display:flex; gap:14px; align-items:center}
+    .menu a{padding:8px 12px; border-radius:10px}
+    .menu a:hover{background:rgba(255,255,255,.06); text-decoration:none}
+
+    .hero{padding:60px 20px 24px; text-align:center}
+    .hero h1{margin:0 0 10px; font-size:clamp(26px,4vw,44px); letter-spacing:-.4px}
+    .hero p{margin:0 auto; max-width:780px; color:var(--muted)}
+    .cta{margin-top:18px; display:inline-flex; gap:10px}
+    .btn{padding:12px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.1); background:transparent; color:var(--text); font-weight:700; cursor:pointer}
+    .btn.primary{background:linear-gradient(45deg,var(--brand),var(--brand2)); color:#fff; border:none; box-shadow:var(--shadow)}
+
+    section{margin:22px 0}
+    .panel{background:var(--panel); border:1px solid rgba(255,255,255,.08); border-radius:var(--radius); box-shadow:var(--shadow)}
+
+    /* ===== 지도 패널 ===== */
+    .map-card{padding:14px}
+    .map-frame{width:100%; aspect-ratio: 16/10; border:0; border-radius:12px}
+
+    /* ===== 필터 & 갤러리 ===== */
+    .toolbar{display:grid; gap:10px; grid-template-columns:repeat(12,1fr); padding:14px}
+    .toolbar .cell{grid-column: span 12}
+    .toolbar select, .toolbar input{width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:transparent; color:var(--text)}
+    .toolbar .btn{width:100%}
+    @media (min-width: 860px){
+      .toolbar .cell.span3{grid-column: span 3}
+      .toolbar .cell.span2{grid-column: span 2}
+      .toolbar .cell.span4{grid-column: span 4}
+    }
+
+    .gallery{padding:14px; display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:14px}
+    .card{background:var(--panel); border:1px solid rgba(255,255,255,.08); border-radius:14px; overflow:hidden; display:flex; flex-direction:column}
+    .card img{display:block; width:100%; height:180px; object-fit:cover; background:#111}
+    .card .meta{padding:12px}
+    .meta h4{margin:0 0 6px; font-size:16px}
+    .meta p{margin:0; color:var(--muted); font-size:14px}
+    .tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+    .tag{font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.14); color:var(--muted)}
+
+    /* ===== 표 ===== */
+    table{width:100%; border-collapse: collapse}
+    th, td{padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.08)}
+    th{ text-align:left; color:var(--muted); font-weight:700 }
+
+    /* ===== 유틸 ===== */
+    .hidden{display:none}
+    .tip{border-left:3px solid var(--brand); background:rgba(92,124,250,.08); padding:10px 12px; border-radius:8px; color:var(--muted)}
+    footer{padding:22px; text-align:center; color:var(--muted)}
+
+    /* === 다크 모드에서 셀렉트 드롭다운 대비 향상 === */
+    @media (prefers-color-scheme: dark){
+      .toolbar select, .toolbar input{ color-scheme: light; background:#fff; color:#111; border-color:#d0d7de; }
+      .toolbar select option{ background:#fff; color:#111; }
+      .toolbar select option:checked{ background:#1d4ed8; color:#fff; }
+      .toolbar ::placeholder{ color:#6b7280; opacity:1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="nav wrap">
+      <div class="logo"><span class="logo-badge"></span> 궁남지 수생식물 탐사</div>
+      <div class="menu" role="navigation" aria-label="주 메뉴">
+        <a href="#map">지도</a>
+        <a href="#gallery">사진</a>
+        <a href="#log">기록</a>
+        <a href="#how">사진 추가 방법</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <!-- Hero -->
+    <section class="hero">
+      <h1>현장에서 기록하고, 웹에서 공유하는 <span style="background:linear-gradient(45deg,var(--brand),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent">궁남지 탐사</span></h1>
+      <p>계획서의 탐사 항목(연꽃·수생식물 분포, 밀도, 수면 상태)을 토대로, 위치와 사진을 모아 시각화합니다. 지도는 <b>Google Maps Embed</b>를 사용해 키 없이 안전하게 표시하고, 사진/기록은 깔끔한 카드와 표로 정리합니다.</p>
+      <div class="cta">
+        <a class="btn primary" href="#map">지도 보기</a>
+        <a class="btn" href="#how">사진 추가 가이드</a>
+      </div>
+    </section>
+
+    <!-- Map (Embed IFrame) -->
+    <section id="map" class="panel map-card" aria-labelledby="map-title">
+      <h2 id="map-title" style="margin:8px 6px 12px">탐사 구역 지도</h2>
+      <iframe class="map-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3216.760023712774!2d126.90964771191248!3d36.26960467228811!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x35707578696e8403%3A0x40998f08d4e0eaf0!2z67aA7JesIOq2geuCqOyngA!5e0!3m2!1sko!2skr!4v1759282299773!5m2!1sko!2skr"></iframe>
+      <p class="tip" style="margin-top:10px">지도의 마커/레이어는 Embed 특성상 직접 제어가 어렵습니다. 대신 사진 카드에 좌표/링크를 넣어 지도로 이동할 수 있게 했어요.</p>
+    </section>
+
+    <!-- Filters + Gallery -->
+    <section id="gallery" class="panel" aria-labelledby="gallery-title">
+      <div class="toolbar">
+        <!-- 종 -->
+        <div class="cell span3">
+          <select id="f-species" aria-label="종 필터"><option value="">전체 식물종</option></select>
+        </div>
+        <!-- 위치(구역) A–E 선택 -->
+        <div class="cell span3">
+          <select id="f-section" aria-label="구역 필터">
+            <option value="">전체 구역(A–E)</option>
+            <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option>
+          </select>
+        </div>
+        <!-- 밀도 -->
+        <div class="cell span3">
+          <select id="f-density" aria-label="밀도 필터">
+            <option value="">밀도(전체)</option>
+            <option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option>
+          </select>
+        </div>
+        <div class="cell span3"><button id="f-reset" class="btn">필터 초기화</button></div>
+      </div>
+      <div id="cards" class="gallery" aria-live="polite"></div>
+      <div id="empty" class="tip" style="margin:0 14px 14px">아직 등록된 사진이 없습니다. 아래 <b>사진 추가 방법</b>을 참고해 <code>photos/</code> 폴더에 이미지를 넣고 목록을 업데이트하세요.</div>
+    </section>
+
+    <!-- Observation Log Table (optional manual entries) -->
+    <section id="log" class="panel" style="padding:14px" aria-labelledby="log-title">
+      <h2 id="log-title" style="margin:6px 4px 10px">관찰 기록(요약 표)</h2>
+      <table id="logtable">
+        <thead>
+          <tr><th>종</th><th>위치</th><th>밀도</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- How to add photos -->
+    <section id="how" class="panel" style="padding:16px" aria-labelledby="how-title">
+      <h2 id="how-title" style="margin:6px 4px 12px">사진 추가 방법</h2>
+      <ol>
+        <li><b>리포지토리에 <code>photos/</code> 폴더</b>를 만들고, 촬영 사진을 넣습니다. (파일명 예: <code>2025-10-01_12-03-20_N36.2696_E126.9096.jpg</code>)</li>
+        <li>아래의 <b>이미지 목록(JSON)</b>에 항목을 추가합니다. (파일 내부 JSON 또는 별도 <code>images.json</code>)</li>
+        <li>항목은 <code>url</code>, <code>date</code>, <code>lat</code>, <code>lng</code>, <code>species</code>, <code>density</code>, <code>water</code>, <code>notes</code>를 포함합니다.</li>
+        <li>커밋/푸시 후 이 페이지를 새로고침하면 갤러리와 표가 자동 갱신됩니다.</li>
+      </ol>
+      <p class="tip">나중에 JSON을 별도 파일(<code>/images.json</code>)로 분리하려면, 아래 내장 JSON 대신 같은 스키마의 파일을 만들고 <code>DATA_SRC</code> 경로를 바꿔주세요.</p>
+    </section>
+  </main>
+
+  <footer>
+    © <span id="year"></span> 궁남지 수생식물 탐사 · GitHub Pages
+  </footer>
+
+  <!-- ===== 내장 데이터(JSON) — 테스트 케이스 포함 ===== -->
+  <script id="images-data" type="application/json">{
+    "items": [
+      { "url": "photos/section A photos/연꽃 잎_A.jpg", "date": "2025-10-01T10:20:00+09:00", "section": "A", "species": "연(Nelumbo nucifera)", "density": 3 },
+      { "url": "photos/section A photos/Nelumbo nucifera_A.jpg", "date": "2025-10-01T10:35:00+09:00", "section": "A", "species": "연(Nelumbo nucifera)", "density": 2 },
+      { "url": "photos/section A photos/여뀌_A.png", "date": "2025-10-01T11:10:00+09:00", "section": "A", "species": "여뀌(Persicaria)", "density": 2 },
+      { "url": "photos/section A photos/사마귀풀_A.png", "date": "2025-10-01T11:35:00+09:00", "section": "A", "species": "사마귀풀(Elatine triandra)", "density": 3 },
+      { "url": "photos/section A photos/개구리밥_A.png", "date": "2025-10-01T12:10:00+09:00", "section": "A", "species": "개구리밥(Lemna)", "density": 4 },
+      { "url": "photos/section A photos/생이가래_A.png", "date": "2025-10-01T12:25:00+09:00", "section": "A", "species": "생이가래(Salvinia natans)", "density": 4 }
+    ]
+  }</script>
+
+  <script>
+    // -------------------- 기본 유틸 --------------------
+    const $ = (s, r=document) => r.querySelector(s);
+    const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+    const pad = n => String(n).padStart(2,'0');
+    const fmtDate = iso => {
+      if(!iso) return '';
+      const d = new Date(iso);
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    };
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // -------------------- 데이터 로딩 --------------------
+    const DATA_SRC = 'image.json'; // null이면 아래 내장 JSON 사용. 분리 시 '/images.json' 같은 경로로 교체
+    async function loadData(){
+      try{
+        if(DATA_SRC){
+          const res = await fetch(DATA_SRC, {cache:'no-store'});
+          return await res.json();
+        } else {
+          const raw = document.getElementById('images-data').textContent || '{"items":[]}';
+          return JSON.parse(raw);
+        }
+      }catch(e){
+        console.warn('데이터 로드 실패', e);
+        return {items:[]};
+      }
+    }
+
+    // -------------------- 렌더 --------------------
+    function renderGallery(items){
+      const cards = document.getElementById('cards');
+      const empty = document.getElementById('empty');
+      cards.innerHTML = '';
+      if(!items.length){ empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+
+      // 종 셀렉트 옵션 구축
+      const speciesSet = new Set(items.filter(x=>x.species).map(x=>x.species));
+      const spSel = document.getElementById('f-species');
+      spSel.innerHTML = '<option value="">전체 식물종</option>' + Array.from(speciesSet).sort().map(s=>`<option>${s}</option>`).join('');
+
+      for(const it of items){
+        const el = document.createElement('article');
+        el.className = 'card';
+        el.dataset.species = it.species||'';
+        el.dataset.density = it.density||'';
+        el.dataset.water = it.water||'';
+        el.dataset.date = it.date||'';
+
+        const img = document.createElement('img');
+        img.loading = 'lazy';
+        img.alt = `${it.species||'식물'} 사진`;
+        const toUrl = (u)=> u ? (u.startsWith('http') ? u : encodeURI(u)) : '';
+        img.src = toUrl(it.thumb||it.url||'');
+        img.onerror = ()=>{ img.style.background='#222'; img.alt = (img.alt||'') + ' (로드 실패)'; }
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const h4 = document.createElement('h4');
+        const locLink = (it.lat&&it.lng) ? ` <a href="https://maps.google.com/?q=${it.lat},${it.lng}" target="_blank" rel="noopener">지도보기→</a>` : '';
+        h4.innerHTML = `${it.species||'미지정'} · 밀도 ${it.density??'-'}${locLink}`;
+        const p = document.createElement('p');
+        p.textContent = `${fmtDate(it.date)} · ${it.water||'수면상태 미입력'}`;
+        const tags = document.createElement('div');
+        tags.className='tags';
+        for(const t of [it.species, `D${it.density}`, it.water].filter(Boolean)){
+          const tag = document.createElement('span'); tag.className='tag'; tag.textContent = t; tags.appendChild(tag);
+        }
+        const note = document.createElement('p'); note.style.marginTop='8px'; note.textContent = it.notes||'';
+
+        meta.appendChild(h4); meta.appendChild(p); meta.appendChild(tags); meta.appendChild(note);
+        el.appendChild(img); el.appendChild(meta);
+        cards.appendChild(el);
+      }
+    }
+
+    function renderTable(items){
+      const tb = document.querySelector('#logtable tbody');
+      tb.innerHTML = items.map(it=>`<tr>
+        <td>${it.species||''}</td>
+        <td>${it.lat&&it.lng? `${Number(it.lat).toFixed(5)}, ${Number(it.lng).toFixed(5)}`: ''}</td>
+        <td>${it.density??''}</td>
+      </tr>`).join('');
+    }
+
+    // -------------------- 필터 --------------------
+  function applyFilters(all){
+  const sp = document.getElementById('f-species').value || '';
+  const dn = document.getElementById('f-density').value || '';
+  const section = (document.getElementById('f-section').value || '').trim();
+  return all.filter(it=>{
+    if(sp && it.species !== sp) return false;
+    if(dn && String(it.density) !== String(dn)) return false;
+    if(section){
+      // 섹션 필터: 항목의 section 필드와 정확 비교 (대소문자 무시)
+      if(String(it.section || '').toUpperCase() !== section.toUpperCase()) return false;
+    }
+    return true;
+  });
+}
+
+    // -------------------- 부트스트랩(IIFE) --------------------
+    (async function(){
+      const data = await loadData();
+      const all = Array.isArray(data) ? data : (data.items||[]);
+
+      function rerender(){
+        const filtered = applyFilters(all);
+        renderGallery(filtered);
+        renderTable(filtered);
+      }
+
+      ['f-species','f-section','f-density'].forEach(id=>{
+        const el = document.getElementById(id);
+        if(el){ el.addEventListener('input', rerender); el.addEventListener('change', rerender); }
+      });
+      const resetBtn = document.getElementById('f-reset');
+      if(resetBtn){
+        resetBtn.addEventListener('click', ()=>{
+          ['f-species','f-section','f-density'].forEach(id=>{ const el = document.getElementById(id); if(el) el.value=''; });
+          rerender();
+        });
+      }
+
+      rerender();
+    })();
+  </script>
+</body>
+</html>
