@@ -35,6 +35,7 @@
     .cta{margin-top:18px; display:inline-flex; gap:10px}
     .btn{padding:12px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.1); background:transparent; color:var(--text); font-weight:700; cursor:pointer}
     .btn.primary{background:linear-gradient(45deg,var(--brand),var(--brand2)); color:#fff; border:none; box-shadow:var(--shadow)}
+    .btn.active{box-shadow:0 6px 18px rgba(0,0,0,.25); background:linear-gradient(45deg,var(--brand),var(--brand2)); color:#fff; border:none}
 
     section{margin:22px 0}
     .panel{background:var(--panel); border:1px solid rgba(255,255,255,.08); border-radius:var(--radius); box-shadow:var(--shadow)}
@@ -42,6 +43,19 @@
     /* ===== 지도 패널 ===== */
     .map-card{padding:14px}
     .map-frame{width:100%; aspect-ratio: 16/10; border:0; border-radius:12px}
+    /* map 이미지가 iframe과 달리 자연비율로 보이도록 별도 스타일 적용 */
+    img#map-image.map-frame{
+      aspect-ratio: auto !important;
+      width:100%;
+      height:auto !important;
+      max-height:60vh;
+      object-fit:contain;
+      display:block;
+      margin:0 auto;
+      background:#071018;
+      border-radius:12px;
+    }
+    .map-toggle-row{display:flex; gap:8px; padding:8px 14px 0 14px; align-items:center}
 
     /* ===== 필터 & 갤러리 ===== */
     .toolbar{display:grid; gap:10px; grid-template-columns:repeat(12,1fr); padding:14px}
@@ -69,7 +83,7 @@
     th{ text-align:left; color:var(--muted); font-weight:700 }
 
     /* ===== 유틸 ===== */
-    .hidden{display:none}
+    .hidden{display:none !important}
     .tip{border-left:3px solid var(--brand); background:rgba(92,124,250,.08); padding:10px 12px; border-radius:8px; color:var(--muted)}
     footer{padding:22px; text-align:center; color:var(--muted)}
 
@@ -90,7 +104,6 @@
         <a href="#map">지도</a>
         <a href="#gallery">사진</a>
         <a href="#log">기록</a>
-        <a href="#how">사진 추가 방법</a>
       </div>
     </nav>
   </header>
@@ -99,19 +112,24 @@
     <!-- Hero -->
     <section class="hero">
       <h1>현장에서 기록하고, 웹에서 공유하는 <span style="background:linear-gradient(45deg,var(--brand),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent">궁남지 탐사</span></h1>
-      <p>계획서의 탐사 항목(연꽃·수생식물 분포, 밀도, 수면 상태)을 토대로, 위치와 사진을 모아 시각화합니다. 지도는 <b>Google Maps Embed</b>를 사용해 키 없이 안전하게 표시하고, 사진/기록은 깔끔한 카드와 표로 정리합니다.</p>
+      <p>계획서의 탐사 항목(연꽃·수생식물 분포, 밀도)을 토대로, 위치와 사진을 모아 시각화합니다. 지도는 <b>Google Maps Embed</b>와 탐사 구역 도면을 전환해 확인할 수 있습니다.</p>
       <div class="cta">
         <a class="btn primary" href="#map">지도 보기</a>
-        <a class="btn" href="#how">사진 추가 가이드</a>
       </div>
     </section>
 
-    <!-- Map (Embed IFrame) -->
+    <!-- Map (Google iframe + local image toggle) -->
     <section id="map" class="panel map-card" aria-labelledby="map-title">
       <h2 id="map-title" style="margin:8px 6px 12px">탐사 구역 지도</h2>
-      <iframe class="map-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3216.760023712774!2d126.90964771191248!3d36.26960467228811!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x35707578696e8403%3A0x40998f08d4e0eaf0!2z67aA7JesIOq2geuCqOyngA!5e0!3m2!1sko!2skr!4v1759282299773!5m2!1sko!2skr"></iframe>
-      <p class="tip" style="margin-top:10px">지도의 마커/레이어는 Embed 특성상 직접 제어가 어렵습니다. 대신 사진 카드에 좌표/링크를 넣어 지도로 이동할 수 있게 했어요.</p>
+      <div class="map-toggle-row">
+        <button id="map-google-btn" class="btn active" type="button">Google 지도</button>
+        <button id="map-image-btn" class="btn" type="button">구역 도면 (map_sections.png)</button>
+      </div>
+      <div id="map-container" style="padding:14px">
+        <iframe id="map-google" class="map-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3216.760023712774!2d126.90964771191248!3d36.26960467228811!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x35707578696e8403%3A0x40998f08d4e0eaf0!2z67aA7JesIOq2geuCqOyngA!5e0!3m2!1sko!2skr!4v1759282299773!5m2!1sko!2skr"></iframe>
+        <img id="map-image" class="map-frame hidden" src="photos/map_sections.png" alt="탐사 구역 도면(map_sections)" />
+      </div>
     </section>
 
     <!-- Filters + Gallery -->
@@ -138,7 +156,7 @@
         <div class="cell span3"><button id="f-reset" class="btn">필터 초기화</button></div>
       </div>
       <div id="cards" class="gallery" aria-live="polite"></div>
-      <div id="empty" class="tip" style="margin:0 14px 14px">아직 등록된 사진이 없습니다. 아래 <b>사진 추가 방법</b>을 참고해 <code>photos/</code> 폴더에 이미지를 넣고 목록을 업데이트하세요.</div>
+      <div id="empty" class="tip" style="margin:0 14px 14px">아직 등록된 사진이 없습니다.<b>사진 추가 방법</b>을 참고해 <code>photos/</code> 폴더에 이미지를 넣고 목록을 업데이트하세요.</div>
     </section>
 
     <!-- Observation Log Table (optional manual entries) -->
@@ -152,32 +170,18 @@
       </table>
     </section>
 
-    <!-- How to add photos -->
-    <section id="how" class="panel" style="padding:16px" aria-labelledby="how-title">
-      <h2 id="how-title" style="margin:6px 4px 12px">사진 추가 방법</h2>
-      <ol>
-        <li><b>리포지토리에 <code>photos/</code> 폴더</b>를 만들고, 촬영 사진을 넣습니다. (파일명 예: <code>2025-10-01_12-03-20_N36.2696_E126.9096.jpg</code>)</li>
-        <li>아래의 <b>이미지 목록(JSON)</b>에 항목을 추가합니다. (파일 내부 JSON 또는 별도 <code>images.json</code>)</li>
-        <li>항목은 <code>url</code>, <code>date</code>, <code>lat</code>, <code>lng</code>, <code>species</code>, <code>density</code>, <code>water</code>, <code>notes</code>를 포함합니다.</li>
-        <li>커밋/푸시 후 이 페이지를 새로고침하면 갤러리와 표가 자동 갱신됩니다.</li>
-      </ol>
-      <p class="tip">나중에 JSON을 별도 파일(<code>/images.json</code>)로 분리하려면, 아래 내장 JSON 대신 같은 스키마의 파일을 만들고 <code>DATA_SRC</code> 경로를 바꿔주세요.</p>
-    </section>
   </main>
 
   <footer>
     © <span id="year"></span> 궁남지 수생식물 탐사 · GitHub Pages
   </footer>
 
-  <!-- ===== 내장 데이터(JSON) — 테스트 케이스 포함 ===== -->
+  <!-- ===== 내장 데이터(JSON) — 테스트 케이스 포함 (수면상태 필드 제거) ===== -->
   <script id="images-data" type="application/json">{
     "items": [
-      { "url": "photos/section A photos/연꽃 잎_A.jpg", "date": "2025-10-01T10:20:00+09:00", "section": "A", "species": "연(Nelumbo nucifera)", "density": 3 },
-      { "url": "photos/section A photos/Nelumbo nucifera_A.jpg", "date": "2025-10-01T10:35:00+09:00", "section": "A", "species": "연(Nelumbo nucifera)", "density": 2 },
-      { "url": "photos/section A photos/여뀌_A.png", "date": "2025-10-01T11:10:00+09:00", "section": "A", "species": "여뀌(Persicaria)", "density": 2 },
-      { "url": "photos/section A photos/사마귀풀_A.png", "date": "2025-10-01T11:35:00+09:00", "section": "A", "species": "사마귀풀(Elatine triandra)", "density": 3 },
-      { "url": "photos/section A photos/개구리밥_A.png", "date": "2025-10-01T12:10:00+09:00", "section": "A", "species": "개구리밥(Lemna)", "density": 4 },
-      { "url": "photos/section A photos/생이가래_A.png", "date": "2025-10-01T12:25:00+09:00", "section": "A", "species": "생이가래(Salvinia natans)", "density": 4 }
+      { "url": "photos/section_A/연꽃_잎_A.jpg", "date": "2025-10-01T10:20:00+09:00", "section": "A", "species": "연(Nelumbo nucifera)", "density": 3 },
+      { "url": "photos/section_A/Nelumbo_nucifera_A.jpg", "date": "2025-10-01T10:35:00+09:00", "section": "A", "species": "연(Nelumbo nucifera)", "density": 2 },
+      { "url": "photos/section_A/여뀌_A.png", "date": "2025-10-01T11:10:00+09:00", "section": "A", "species": "여뀌(Persicaria)", "density": 2 }
     ]
   }</script>
 
@@ -195,7 +199,7 @@
     document.getElementById('year').textContent = new Date().getFullYear();
 
     // -------------------- 데이터 로딩 --------------------
-    const DATA_SRC = 'image.json'; // null이면 아래 내장 JSON 사용. 분리 시 '/images.json' 같은 경로로 교체
+    const DATA_SRC = 'image.json'; // null이면 아래 내장 JSON 사용.
     async function loadData(){
       try{
         if(DATA_SRC){
@@ -209,6 +213,19 @@
         console.warn('데이터 로드 실패', e);
         return {items:[]};
       }
+    }
+
+    // -------------------- 설명 로직 --------------------
+    function getDescription(species){
+      if(!species) return '';
+      const s = species.toLowerCase();
+      if(s.includes('개구리')) return '작고 떠다니는 부유성 식물로, 수면을 빠르게 덮습니다.';
+      if(s.includes('사마귀')) return '작은 초본성 식물로 연못 가장자리 또는 얕은 물에서 관찰됩니다.';
+      if(s.includes('생이가래')) return '수면을 덮는 부유성 또는 부착성 수생식물입니다.';
+      if(s.includes('여뀌')) return '수변에서 자라는 초본으로 잎과 꽃이 특징적입니다.';
+      if(s.includes('연') || s.includes('수련') || s.includes('빅토리아')) return '연꽃·수련류: 큰 잎을 띄우며 물 위 생태계에서 중요한 식물입니다.';
+      if(s.includes('토란') || s.includes('canna')) return '수변 재배식물 또는 관상용으로 자주 심깁니다.';
+      return '관찰 기록에 따라 분포와 밀도를 확인하세요.';
     }
 
     // -------------------- 렌더 --------------------
@@ -229,7 +246,7 @@
         el.className = 'card';
         el.dataset.species = it.species||'';
         el.dataset.density = it.density||'';
-        el.dataset.water = it.water||'';
+        el.dataset.section = it.section||'';
         el.dataset.date = it.date||'';
 
         const img = document.createElement('img');
@@ -244,16 +261,24 @@
         const h4 = document.createElement('h4');
         const locLink = (it.lat&&it.lng) ? ` <a href="https://maps.google.com/?q=${it.lat},${it.lng}" target="_blank" rel="noopener">지도보기→</a>` : '';
         h4.innerHTML = `${it.species||'미지정'} · 밀도 ${it.density??'-'}${locLink}`;
+
         const p = document.createElement('p');
-        p.textContent = `${fmtDate(it.date)} · ${it.water||'수면상태 미입력'}`;
+        // 날짜 + 섹션 표시 (수면상태 제거)
+        p.textContent = `${fmtDate(it.date)} · 섹션 ${it.section||'미지정'}`;
+
+        const desc = document.createElement('p');
+        desc.style.marginTop = '8px';
+        desc.style.color = 'var(--muted)';
+        desc.style.fontSize = '13px';
+        desc.textContent = getDescription(it.species);
+
         const tags = document.createElement('div');
         tags.className='tags';
-        for(const t of [it.species, `D${it.density}`, it.water].filter(Boolean)){
+        for(const t of [it.species, `D${it.density}`, `S:${it.section}`].filter(Boolean)){
           const tag = document.createElement('span'); tag.className='tag'; tag.textContent = t; tags.appendChild(tag);
         }
-        const note = document.createElement('p'); note.style.marginTop='8px'; note.textContent = it.notes||'';
 
-        meta.appendChild(h4); meta.appendChild(p); meta.appendChild(tags); meta.appendChild(note);
+        meta.appendChild(h4); meta.appendChild(p); meta.appendChild(desc); meta.appendChild(tags);
         el.appendChild(img); el.appendChild(meta);
         cards.appendChild(el);
       }
@@ -263,26 +288,45 @@
       const tb = document.querySelector('#logtable tbody');
       tb.innerHTML = items.map(it=>`<tr>
         <td>${it.species||''}</td>
-        <td>${it.lat&&it.lng? `${Number(it.lat).toFixed(5)}, ${Number(it.lng).toFixed(5)}`: ''}</td>
+        <td>${it.section?it.section:(it.lat&&it.lng? `${Number(it.lat).toFixed(5)}, ${Number(it.lng).toFixed(5)}`: '')}</td>
         <td>${it.density??''}</td>
       </tr>`).join('');
     }
 
     // -------------------- 필터 --------------------
-  function applyFilters(all){
-  const sp = document.getElementById('f-species').value || '';
-  const dn = document.getElementById('f-density').value || '';
-  const section = (document.getElementById('f-section').value || '').trim();
-  return all.filter(it=>{
-    if(sp && it.species !== sp) return false;
-    if(dn && String(it.density) !== String(dn)) return false;
-    if(section){
-      // 섹션 필터: 항목의 section 필드와 정확 비교 (대소문자 무시)
-      if(String(it.section || '').toUpperCase() !== section.toUpperCase()) return false;
+    function applyFilters(all){
+      const sp = document.getElementById('f-species').value || '';
+      const dn = document.getElementById('f-density').value || '';
+      const section = (document.getElementById('f-section').value || '').trim();
+      return all.filter(it=>{
+        if(sp && it.species !== sp) return false;
+        if(dn && String(it.density) !== String(dn)) return false;
+        if(section){
+          if(String(it.section || '').toUpperCase() !== section.toUpperCase()) return false;
+        }
+        return true;
+      });
     }
-    return true;
-  });
-}
+
+    // -------------------- 지도 토글 처리 --------------------
+    function setupMapToggle(){
+      const gBtn = document.getElementById('map-google-btn');
+      const iBtn = document.getElementById('map-image-btn');
+      const gFrame = document.getElementById('map-google');
+      const img = document.getElementById('map-image');
+
+      function showGoogle(){
+        gBtn.classList.add('active'); iBtn.classList.remove('active');
+        gFrame.classList.remove('hidden'); img.classList.add('hidden');
+      }
+      function showImage(){
+        iBtn.classList.add('active'); gBtn.classList.remove('active');
+        img.classList.remove('hidden'); gFrame.classList.add('hidden');
+      }
+
+      gBtn.addEventListener('click', showGoogle);
+      iBtn.addEventListener('click', showImage);
+    }
 
     // -------------------- 부트스트랩(IIFE) --------------------
     (async function(){
@@ -307,6 +351,7 @@
         });
       }
 
+      setupMapToggle();
       rerender();
     })();
   </script>
